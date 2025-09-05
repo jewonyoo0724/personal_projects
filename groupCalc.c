@@ -14,7 +14,7 @@ int main (int argc, char *argv[]){
 
     int order, numFunc, maxLength;
 
-    //get cardinality of Sn (dub order)
+    //get cardinality of Sn dub order
     printf("Cardinality of symmetric group: ");
     scanf("%i", &order);
     printf("\n");
