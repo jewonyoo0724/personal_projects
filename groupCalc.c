@@ -1,80 +1,90 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
-char *getCycle(char** cycles, int index, int card);
-char *groupCalc(char **cycles, char *comp, char *result);
+typedef struct{
+    int number;
+    struct node *next;
+}node;
 
-int main (int argc, char **argv){
+void getCycle(int index, int maxLength, node *root);
 
-    int numCycle, card, maxLength;
-    char *result, *comp;
-    char **cycles;
+int main (int argc, char *argv[]){
 
-    //Sn -> get n
+    int order, numFunc, maxLength;
+
+    //get cardinality of Sn (dub order)
     printf("Cardinality of symmetric group: ");
-    scanf("%i", &card);
+    scanf("%i", &order);
     printf("\n");
 
-    maxLength = 3 * card;
+    maxLength = 3 * order;
 
-    //num of cycles in Sn
-    printf("Enter number of cycles: ");
-    scanf("%i", &numCycle);
+    //get number of cycles
+    printf("Enter number of functions: ");
+    scanf("%i", &numFunc);
     printf("\n");
 
-    //array of strings. size numCycle. strings cannot be more than n (excluding parantheses)
-    cycles = malloc(numCycle * maxLength * sizeof(char)); //refine
-
-    //get cycles
-    for (int i = 0; i < numCycle; i++){
-        cycles[i] = getCycles(cycles, i, maxLength);
+    node **root = malloc(numFunc * sizeof(node *));
+    for (int i = 0; i < numFunc; i++){
+        root[i] = malloc(maxLength * sizeof(node *));
     }
 
-    char *result = malloc(sizeof(char)); // dont know maxLength yet
-    char *comp = malloc(numCycle * sizeof(char));
-
-    printf("Enter composition order (e.g. c1c2c3): ");
-    scanf("%s", comp);
-
-    groupCalc(cycles, comp, result);
-
-    for (int i = 0; i < numCycle; i++){
-        free(cycles[i]);
+    //get cycles & store in linked list
+    for (int i = 0; i < numFunc; i++){
+        getCycle(i, maxLength, root[i]);
     }
-    free(comp);
-    free(cycles);
+
+    //calculate composition
+        //recursion for composition longer than 2
+
+
+    for (int i = 0; i < numFunc; i++){
+        free(root[i]);
+    }
+    free(root);
 }
 
-//function gets cycle input
-char *getCycle(char**cycles, int index, int maxLength){
+void getCycle(int index, int maxLength, node *root){
 
-    cycles[index] = malloc(maxLength * sizeof(char));
+    char *cycle = malloc(maxLength * sizeof(char));
 
-    printf("Cycle (omit if trivial; no commas) c%i= ", index+1);
-    fgets(cycles[index], maxLength * sizeof(char), stdin); //(1)...(n) max
+    printf("Enter function %i (may omit trivial cycles)\n", index+1);
+    fgets(cycle, maxLength * sizeof(char), stdin);
 
-    if (cycles[index] == NULL) cycles[index] = 'i'; //for identity as it is fully trivial
+    int i, j = strlen(cycle), count = 0, k = 0;
+    for (i = 0; i < j; i++){
+        if (cycle[i] == '(') count++;
+    }
 
-    return cycles[index];
-}
+    //root 0
+    i = 0;
+    for (int p = 0; p < count; p++){
+        for (; i < j; i++){
 
-char *groupCalc(char **cycles, char *comp, char *result){
+            if (cycle[i] == '(') continue;
+            else if (cycle[i] == ')'){
+                node *ptr = root[index][p];
+                while (ptr != NULL) ptr = ptr->next;
+                ptr->next = root[index][p]; //circle back to first node -> creates cycle
+                break;
+            }
 
-    int length = strlen(comp);
-    int index;
+            root[index][p] = NULL;
+            node *n = malloc(sizeof(node));
 
-    for (int i = 0; i < length; i++)
-    {
-        if (comp[i] == 'c') continue;
+            if (n == NULL){
+                free(cycle);
+                return NULL;
+            }
 
-        index = comp[length-i-1] - '0';
-        for (int j = 0, k = strlen(cycles[index]); j < k; j++){
+            n->number = cycle[i] - '0';
+            n->next = NULL;
 
-            if (cycles[comp[length-i-1] - '0'][j] == '('
-                || cycles[comp[length-i-1] - '0'][j] == ')') continue;
-
-            result = str
+            n->next = root[index][p];
+            root[index][p] = n;
         }
-        result[i] = cycles[length-i-1]
     }
+    free(cycle);
 }
